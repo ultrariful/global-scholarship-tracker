@@ -1,21 +1,23 @@
 // =====================================================
-// Global Scholarship Tracker - COMPLETE RECODED script.js
+// Global Scholarship Tracker - FINAL FIXED script.js
 // =====================================================
 
 // 1) Default data
 const initialPrograms = [];
 const STORAGE_KEY = 'global_uni_tracker_data_v2';
 
-// load data
+// Safe load from localStorage
 let programs = [];
 try {
   const saved = localStorage.getItem(STORAGE_KEY);
   programs = saved ? JSON.parse(saved) : initialPrograms;
   if (!Array.isArray(programs)) programs = [];
 } catch (e) {
+  console.error('Failed to parse localStorage data:', e);
   programs = [];
 }
 
+// DOM references
 const tableBody = document.getElementById('universityTableBody');
 const searchInput = document.getElementById('searchInput');
 const countryFilter = document.getElementById('countryFilter');
@@ -35,14 +37,20 @@ function savePrograms() {
 }
 
 function escapeHtml(str) {
-  return (str ?? '').toString()
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return (str ?? '')
+    .toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
 
 function normalizeKey(s) {
-  return (s ?? '').toString().trim().toLowerCase()
+  return (s ?? '')
+    .toString()
+    .trim()
+    .toLowerCase()
     .replace(/^\uFEFF/, '')
     .replace(/[^a-z0-9]/g, '');
 }
@@ -63,7 +71,7 @@ function normalizeScholarship(val) {
   if (s.includes('full') || s.includes('fully') || s.includes('100%')) return 'Fully Funded';
   if (s.includes('partial') || s.includes('partially') || s.includes('50%') || s.includes('waiver')) return 'Partially Funded';
   if (s.includes('self') || s.includes('no funding')) return 'Self';
-  return val.toString().trim();
+  return (val ?? 'Self').toString().trim();
 }
 
 function scholarshipClass(label) {
@@ -91,18 +99,21 @@ function normalizeDateForSort(dateStr) {
   return Number.isNaN(d.getTime()) ? new Date('2099-12-31') : d;
 }
 
-// ---------------- Calendar URL ----------------
+// ---------------- Google Calendar ----------------
 function createGoogleCalendarUrl(uni, program, deadlineDate) {
   if (!deadlineDate) return '#';
   try {
     const dateObj = new Date(deadlineDate);
     if (Number.isNaN(dateObj.getTime())) return '#';
+
     const y = dateObj.getUTCFullYear();
     const m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
     const d = String(dateObj.getUTCDate()).padStart(2, '0');
     const date = `${y}${m}${d}`;
+
     const title = encodeURIComponent(`Deadline: ${uni} (${program})`);
     const details = encodeURIComponent(`Application Deadline for ${program} at ${uni}.`);
+
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}/${date}&details=${details}`;
   } catch {
     return '#';
@@ -112,8 +123,11 @@ function createGoogleCalendarUrl(uni, program, deadlineDate) {
 // ---------------- Render ----------------
 function populateCountryOptions() {
   if (!countryFilter) return;
+
   const current = countryFilter.value || 'all';
-  const countries = [...new Set(programs.map(p => (p.country || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const countries = [...new Set(programs.map(p => (p.country || '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+
   countryFilter.innerHTML = '<option value="all">All Countries</option>';
   countries.forEach(c => {
     countryFilter.innerHTML += `<option value="${escapeHtml(c)}" ${c === current ? 'selected' : ''}>${escapeHtml(c)}</option>`;
@@ -127,7 +141,7 @@ function renderPrograms(dataList) {
   const pdfContainer = document.getElementById('pdfPrintContainer');
   if (pdfContainer) pdfContainer.innerHTML = '';
 
-  if (!dataList || dataList.length === 0) {
+  if (!Array.isArray(dataList) || dataList.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="6" class="p-8 text-center text-slate-400">
@@ -144,11 +158,16 @@ function renderPrograms(dataList) {
 
     const row = document.createElement('tr');
     row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800';
+
     row.innerHTML = `
       <td class="p-4">
         <div class="font-bold text-white text-sm">${escapeHtml(item.university || 'N/A')}</div>
         <div class="text-[11px] text-teal-400 font-medium">${escapeHtml(item.country || 'N/A')}</div>
-        ${isValidUrl(item.link) ? `<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-indigo-400 hover:underline">Link ↗</a>` : ''}
+        ${
+          isValidUrl(item.link)
+            ? `<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-indigo-400 hover:underline">Link ↗</a>`
+            : ''
+        }
       </td>
       <td class="p-4">
         <div class="font-medium text-slate-200">${escapeHtml(item.program || 'N/A')}</div>
@@ -156,21 +175,35 @@ function renderPrograms(dataList) {
         <div class="text-[10px] text-slate-500 italic">${escapeHtml(item.researchArea || '')}</div>
       </td>
       <td class="p-4">
-        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded ${scholarshipClass(scholarship)}">${escapeHtml(scholarship)}</span>
-        <div class="text-[11px] text-slate-300 font-medium mt-1">Fee: ${escapeHtml(item.feeAmount ? `${item.feeAmount} ${item.feeCurrency || ''}` : 'Free')}</div>
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded ${scholarshipClass(scholarship)}">
+          ${escapeHtml(scholarship)}
+        </span>
+        <div class="text-[11px] text-slate-300 font-medium mt-1">
+          Fee: ${escapeHtml(item.feeAmount ? `${item.feeAmount} ${item.feeCurrency || ''}` : 'Free')}
+        </div>
       </td>
       <td class="p-4">
-        <div class="text-[11px] text-slate-300">IELTS: <span class="font-semibold text-white">${escapeHtml(item.ieltsScore || 'N/A')}</span> | GRE: <span class="font-semibold text-white">${escapeHtml(item.greScore || 'N/A')}</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">LOR: ${escapeHtml(item.lorAcademic || '-')} (Acad) / ${escapeHtml(item.lorProfessional || '-')} (Prof)</div>
+        <div class="text-[11px] text-slate-300">
+          IELTS: <span class="font-semibold text-white">${escapeHtml(item.ieltsScore || 'N/A')}</span> |
+          GRE: <span class="font-semibold text-white">${escapeHtml(item.greScore || 'N/A')}</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-0.5">
+          LOR: ${escapeHtml(item.lorAcademic || '-')} (Acad) / ${escapeHtml(item.lorProfessional || '-')} (Prof)
+        </div>
       </td>
       <td class="p-4">
         <div class="font-semibold text-white">${escapeHtml(item.deadline || 'N/A')}</div>
-        ${item.deadline ? `<a href="${calendarUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 font-medium mt-0.5">📅 Add to Calendar</a>` : ''}
+        ${
+          item.deadline
+            ? `<a href="${calendarUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 font-medium mt-0.5">📅 Add to Calendar</a>`
+            : ''
+        }
       </td>
       <td class="p-4 text-center">
         <button onclick="deleteProgram('${escapeHtml(item.id)}')" class="text-red-400 hover:text-red-300 font-semibold text-[11px] bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1 rounded-lg transition">Delete</button>
       </td>
     `;
+
     tableBody.appendChild(row);
 
     if (pdfContainer) {
@@ -199,11 +232,11 @@ function filterAndSortData() {
     const uni = (item.university || '').toLowerCase();
     const prog = (item.program || '').toLowerCase();
     const prof = (item.profName || '').toLowerCase();
+
     const matchesSearch = !searchValue || uni.includes(searchValue) || prog.includes(searchValue) || prof.includes(searchValue);
     const matchesCountry = selectedCountry === 'all' || (item.country || '') === selectedCountry;
     const normalizedFunding = normalizeScholarship(item.scholarship);
 
-    // HTML dropdown has "Partial / Self"
     const matchesScholarship =
       selectedScholarship === 'all' ||
       normalizedFunding === selectedScholarship ||
@@ -219,9 +252,7 @@ function filterAndSortData() {
   }
 
   renderPrograms(filtered);
-  if (showingCountEl) {
-    showingCountEl.innerText = `Showing ${filtered.length} of ${programs.length} programs`;
-  }
+  if (showingCountEl) showingCountEl.innerText = `Showing ${filtered.length} of ${programs.length} programs`;
 }
 
 // ---------------- CRUD ----------------
@@ -292,7 +323,7 @@ if (programForm) {
   });
 }
 
-// ---------------- CSV Smart Import ----------------
+// ---------------- Smart CSV Import ----------------
 const HEADER_ALIASES = {
   university: ['university', 'scholarshipname', 'institution', 'institute', 'uni', 'universityname'],
   program: ['program', 'progra', 'relevantfields', 'course', 'degree', 'subject', 'major', 'field'],
@@ -315,7 +346,11 @@ const HEADER_ALIASES = {
 };
 
 function parseCSVText(text) {
-  text = (text || '').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  text = (text || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+
   const firstLine = (text.split('\n').find(l => l.trim().length > 0) || '');
   const delimiters = [',', ';', '\t', '|'];
 
@@ -325,9 +360,14 @@ function parseCSVText(text) {
     for (let i = 0; i < line.length; i++) {
       const c = line[i];
       const next = line[i + 1];
-      if (c === '"' && inQuotes && next === '"') i++;
-      else if (c === '"') inQuotes = !inQuotes;
-      else if (c === delimiter && !inQuotes) count++;
+
+      if (c === '"' && inQuotes && next === '"') {
+        i++;
+      } else if (c === '"') {
+        inQuotes = !inQuotes;
+      } else if (c === delimiter && !inQuotes) {
+        count++;
+      }
     }
     return count;
   }
@@ -384,6 +424,7 @@ function buildHeaderIndexMap(headerRow) {
   for (const [targetField, aliases] of Object.entries(HEADER_ALIASES)) {
     let found = -1;
 
+    // exact match first
     for (const alias of aliases) {
       const a = normalizeKey(alias);
       const idx = normalizedHeaders.findIndex(h => h === a);
@@ -393,6 +434,7 @@ function buildHeaderIndexMap(headerRow) {
       }
     }
 
+    // partial fallback
     if (found === -1) {
       for (const alias of aliases) {
         const a = normalizeKey(alias);
@@ -476,7 +518,9 @@ function handleCSVUpload(event) {
           feeCurrency: getRowValue(row, indexMap, 'feeCurrency', 'USD')
         };
 
-        if (newProgram.link && !isValidUrl(newProgram.link)) newProgram.link = '';
+        if (newProgram.link && !isValidUrl(newProgram.link)) {
+          newProgram.link = '';
+        }
 
         const uniqueKey = normalizeProgramKey(newProgram);
         if (existingKeys.has(uniqueKey)) {
@@ -493,7 +537,10 @@ function handleCSVUpload(event) {
       filterAndSortData();
 
       alert(
-        `🎉 CSV Import Complete!\nAdded: ${addedCount}\nDuplicates skipped: ${duplicateCount}\nEmpty rows skipped: ${skippedEmpty}`
+        `🎉 CSV Import Complete!\n` +
+        `Added: ${addedCount}\n` +
+        `Duplicates skipped: ${duplicateCount}\n` +
+        `Empty rows skipped: ${skippedEmpty}`
       );
 
       if (event?.target) event.target.value = '';
@@ -510,13 +557,14 @@ function handleCSVUpload(event) {
   reader.readAsText(file);
 }
 
+// expose for inline HTML onchange
 window.handleCSVUpload = handleCSVUpload;
 
-// ---------------- Events ----------------
+// ---------------- Listeners ----------------
 if (searchInput) searchInput.addEventListener('input', filterAndSortData);
 if (countryFilter) countryFilter.addEventListener('change', filterAndSortData);
 if (scholarshipFilter) scholarshipFilter.addEventListener('change', filterAndSortData);
 if (sortBy) sortBy.addEventListener('change', filterAndSortData);
 
-// Initial load
+// Initial Load
 filterAndSortData();
