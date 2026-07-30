@@ -207,3 +207,105 @@ if(sortBy) sortBy.addEventListener('change', filterAndSortData);
 
 // Initial Load
 filterAndSortData();
+// 📥 Smart CSV File Import Handler
+function handleCSVUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = parseCSVText(text);
+
+        if (rows.length < 2) {
+            alert("CSV file seems empty or invalid.");
+            return;
+        }
+
+        const headers = rows[0].map(h => h.trim().toLowerCase().replace(/[^a-z0-0]/g, ''));
+        let addedCount = 0;
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.length < 2 || !row.join('').trim()) continue;
+
+            // Map CSV columns dynamically
+            const getVal = (possibleKeys) => {
+                for (let k of possibleKeys) {
+                    const idx = headers.findIndex(h => h.includes(k));
+                    if (idx !== -1 && row[idx]) return row[idx].trim();
+                }
+                return '';
+            };
+
+            const newProgram = {
+                id: Date.now() + Math.random(),
+                university: getVal(['university', 'scholarshipname', 'institution', 'uni']) || 'Unknown University',
+                program: getVal(['program', 'relevantfields', 'course', 'degree']) || 'Higher Study Program',
+                country: getVal(['country', 'region']) || 'Global',
+                scholarship: getVal(['fundingtype', 'scholarship', 'funding']) || 'Fully Funded',
+                profName: getVal(['profname', 'professor', 'host']) || '',
+                researchArea: getVal(['researcharea', 'relevantfields']) || '',
+                link: getVal(['officialwebsite', 'link', 'website', 'url']) || '',
+                remarks: getVal(['notes', 'remarks', 'otherbenefits']) || '',
+                ieltsScore: getVal(['ieltsscore', 'languagerequirement', 'requiredtest']) || 'N/A',
+                greScore: getVal(['grescore', 'requiredtest']) || 'N/A',
+                lorAcademic: getVal(['loracademic', 'otherkeyrequirements']) || '',
+                lorProfessional: getVal(['lorprofessional']) || '',
+                sopInfo: getVal(['sopinfo']) || '',
+                proposalInfo: getVal(['proposalinfo']) || '',
+                startDate: getVal(['applicationstartdate', 'startdate']) || '',
+                deadline: getVal(['applicationdeadline', 'deadline']) || '2026-12-31',
+                feeAmount: getVal(['feeamount', 'tuitioncoverage']) || '0',
+                feeCurrency: getVal(['feecurrency']) || 'USD'
+            };
+
+            programs.unshift(newProgram);
+            addedCount++;
+        }
+
+        // Save to LocalStorage & Refresh Table
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(programs));
+        filterAndSortData();
+        alert(`🎉 Successfully imported ${addedCount} programs from CSV!`);
+        event.target.value = ''; // Reset input
+    };
+
+    reader.readAsText(file);
+}
+
+// Robust CSV Line Parser (Handles quotes & internal commas)
+function parseCSVText(text) {
+    const lines = [];
+    let row = [];
+    let inQuotes = false;
+    let currentVal = '';
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"' && inQuotes && nextChar === '"') {
+            currentVal += '"';
+            i++;
+        } else if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            row.push(currentVal);
+            currentVal = '';
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+            if (char === '\r' && nextChar === '\n') i++;
+            row.push(currentVal);
+            lines.push(row);
+            row = [];
+            currentVal = '';
+        } else {
+            currentVal += char;
+        }
+    }
+    if (currentVal || row.length > 0) {
+        row.push(currentVal);
+        lines.push(row);
+    }
+    return lines;
+}
