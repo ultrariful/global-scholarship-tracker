@@ -15,24 +15,19 @@
         body { font-family: 'Inter', sans-serif; }
         h1, h2, h3, .font-serif { font-family: 'Merriweather', serif; }
         
-        /* Blinking Green Dot */
         @keyframes pulse-green {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.9); }
         }
         .animate-blink { animation: pulse-green 1.8s infinite ease-in-out; }
 
-        /* Levitating Floating Animation for Guest Mode Banner */
         @keyframes levitate {
-            0% { transform: translateY(0px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
-            50% { transform: translateY(-6px); box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.2), 0 12px 15px -8px rgba(0, 0, 0, 0.1); }
-            100% { transform: translateY(0px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+            0% { transform: translateY(0px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+            50% { transform: translateY(-6px); box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.2); }
+            100% { transform: translateY(0px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         }
-        .levitate-box {
-            animation: levitate 4s ease-in-out infinite;
-        }
+        .levitate-box { animation: levitate 4s ease-in-out infinite; }
 
-        /* Print Styles for PDF Export */
         @media print {
             body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
@@ -46,7 +41,7 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- 🔮 Gradient Hero Header (Restored Vibrant Style) -->
+        <!-- 🔮 Hero Header -->
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600 p-8 shadow-2xl border border-white/10">
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
@@ -55,7 +50,6 @@
                     <p class="text-xs md:text-sm text-purple-100 mt-2 max-w-2xl leading-relaxed">Explore, organize, and manage higher education programs globally with real-time stats and personalized controls.</p>
                 </div>
                 
-                <!-- Live Blinking Personal Data Badge -->
                 <div class="flex items-center gap-3 bg-slate-900/40 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-2xl text-xs text-white shadow-lg">
                     <span class="w-3 h-3 rounded-full bg-emerald-400 animate-blink shadow-[0_0_12px_#34d399]"></span>
                     <div>
@@ -64,19 +58,18 @@
                     </div>
                 </div>
             </div>
-            <!-- Decorative Glow Background Effect -->
             <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         </div>
 
-        <!-- ☁️ Levitating Floating Guest Mode Banner -->
+        <!-- ☁️ Floating Guest Banner -->
         <div class="levitate-box bg-gradient-to-r from-slate-800/90 via-indigo-950/80 to-slate-800/90 backdrop-blur-xl border border-indigo-500/30 p-4 rounded-2xl text-xs text-indigo-100 flex items-start gap-3 relative z-20 no-print">
             <span class="text-lg leading-none">💡</span>
             <div class="leading-relaxed">
-                <strong class="text-white font-semibold">Guest mode active:</strong> Your Applied selections, edits, additions and deletions are saved privately in this browser and survive refreshes. They are not shared with other visitors or written to GitHub or Cloudflare. Clearing browser data, using private browsing, or opening the site in another browser/device starts a separate guest profile. PDF export still uses only the currently visible filtered results.
+                <strong class="text-white font-semibold">Guest mode active:</strong> Your Applied selections, edits, additions and deletions are saved privately in this browser and survive refreshes. They are not shared with other visitors or written to GitHub or Cloudflare.
             </div>
         </div>
 
-        <!-- 🎛️ Live Controls & Action Panel -->
+        <!-- 🎛️ Live Controls Panel -->
         <div class="bg-white text-slate-800 p-6 rounded-3xl shadow-2xl space-y-5 no-print">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
@@ -84,13 +77,11 @@
                     <h2 class="text-2xl font-bold text-slate-900">Find and manage programs</h2>
                 </div>
                 
-                <!-- Action Buttons Group -->
                 <div class="flex flex-wrap items-center gap-2.5">
                     <button id="addBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/30 active:scale-95">+ Add program</button>
                     <button id="downloadPdfBtn" onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 font-semibold text-xs px-4 py-2.5 rounded-xl transition">Download List (PDF)</button>
                     <button id="resetDataBtn" onclick="resetPersonalData()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/80 font-semibold text-xs px-4 py-2.5 rounded-xl transition">Reset personal data</button>
                     
-                    <!-- CSV Import -->
                     <label class="bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200/80 font-semibold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition flex items-center gap-1.5">
                         <span>📥 Import CSV</span>
                         <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
@@ -100,16 +91,16 @@
 
             <!-- Filter Inputs -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <input type="text" id="searchInput" placeholder="Search university, course, portal..." class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
-                <select id="countryFilter" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                <input type="text" id="searchInput" placeholder="Search university, course, professor..." class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <select id="countryFilter" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 transition">
                     <option value="all">All Countries</option>
                 </select>
-                <select id="scholarshipFilter" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                <select id="scholarshipFilter" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 transition">
                     <option value="all">All Funding Types</option>
                     <option value="Fully Funded">Fully Funded</option>
-                    <option value="Partial">Partial</option>
+                    <option value="Partial / Self">Partial / Self</option>
                 </select>
-                <select id="sortBy" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                <select id="sortBy" class="w-full border border-slate-200 bg-slate-50/80 p-3 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 transition">
                     <option value="uni">Sort by University</option>
                     <option value="deadline">Sort by Deadline</option>
                 </select>
@@ -123,19 +114,19 @@
                 <span id="showing-count" class="text-xs text-slate-400 font-medium">Showing 0 of 0 programs</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[900px]">
                     <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
                         <tr>
                             <th class="p-4">University & Country</th>
-                            <th class="p-4">Course & Field</th>
-                            <th class="p-4">Scholarship</th>
-                            <th class="p-4">Portal / Link</th>
+                            <th class="p-4">Programme & Professor</th>
+                            <th class="p-4">Funding & Fee</th>
+                            <th class="p-4">Requirements (Test / LOR)</th>
                             <th class="p-4">Deadline & Alert</th>
                             <th class="p-4 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody id="universityTableBody" class="divide-y divide-slate-800 text-slate-200">
-                        <!-- JS Rows Load Here -->
+                        <!-- JS Rows -->
                     </tbody>
                 </table>
             </div>
@@ -150,31 +141,69 @@
 
     </div>
 
-    <!-- Modal Form -->
+    <!-- 📝 Advanced Modal Form (Matching Spreadsheet Criteria) -->
     <div id="addModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 overflow-y-auto no-print">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 text-slate-800 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-lg text-slate-900">Add Higher Study Program</h3>
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 text-slate-800 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 sticky top-0 bg-white z-10">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900">Add Higher Study Program</h3>
+                    <p class="text-[11px] text-slate-500">Enter full details matching your application checklist</p>
+                </div>
                 <button id="closeModal" class="text-2xl font-bold text-slate-400 hover:text-slate-600">&times;</button>
             </div>
-            <form id="programForm" class="space-y-3">
-                <input type="text" id="uniName" required placeholder="University Name *" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="text" id="uniProgram" required placeholder="Course / Program Name *" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="uniCountry" required placeholder="Country *" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                    <select id="uniScholarship" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="Fully Funded">Fully Funded</option>
-                        <option value="Partial">Partial</option>
-                    </select>
+            
+            <form id="programForm" class="space-y-4">
+                <!-- Section 1: General Info -->
+                <div>
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">1. General Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="text" id="uniName" required placeholder="Name of University *" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="uniProgram" required placeholder="Name of Programme *" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="uniCountry" required placeholder="Country *" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="uniScholarship" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Fully Funded">Type of Funding: Fully Funded</option>
+                            <option value="Partial / Self">Type of Funding: Partial / Self</option>
+                        </select>
+                        <input type="text" id="profName" placeholder="Name of Professor (Optional)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="researchArea" placeholder="Research Interest Alignment Area" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="url" id="uniLink" placeholder="Program Link (https://...)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="remarks" placeholder="Remarks (if any)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="uniPortal" placeholder="Portal Name (e.g. Uni-Assist)" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                    <input type="date" id="uniDeadline" required class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+
+                <!-- Section 2: Application Requirements -->
+                <div class="border-t pt-3">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">2. Application Requirements & Test Scores</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="text" id="ieltsScore" placeholder="IELTS / TOEFL Requirement (e.g. 7.0)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="greScore" placeholder="GRE Requirement (e.g. 310)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="lorAcademic" placeholder="Academic LOR Count / Info" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="lorProfessional" placeholder="Professional LOR Count / Info" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="sopInfo" placeholder="SOP / Motivation Letter Rules" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="proposalInfo" placeholder="Research Proposal / Study Plan" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
                 </div>
-                <input type="url" id="uniLink" placeholder="Official Link (https://...)" class="w-full border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+
+                <!-- Section 3: Dates & Fees -->
+                <div class="border-t pt-3">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">3. Timeline & Fees</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] text-slate-500">Application Start Date</label>
+                            <input type="date" id="startDate" class="w-full border p-2 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500">Application Deadline *</label>
+                            <input type="date" id="uniDeadline" required class="w-full border p-2 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <input type="text" id="feeAmount" placeholder="App Fee Amount (e.g. 75)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="feeCurrency" placeholder="Currency (e.g. USD / EUR)" class="border p-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" id="cancelBtn" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-semibold hover:bg-slate-200">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-md">Save Program</button>
+                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-md">Save Complete Program</button>
                 </div>
             </form>
         </div>
