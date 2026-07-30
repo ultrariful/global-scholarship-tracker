@@ -207,6 +207,9 @@ if(sortBy) sortBy.addEventListener('change', filterAndSortData);
 
 // Initial Load
 filterAndSortData();
+    }
+    return lines;
+}
 // 📥 Smart CSV File Import Handler
 function handleCSVUpload(event) {
     const file = event.target.files[0];
@@ -307,5 +310,3 @@ function parseCSVText(text) {
         row.push(currentVal);
         lines.push(row);
     }
-    return lines;
-}
