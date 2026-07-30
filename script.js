@@ -1,12 +1,30 @@
-// ১. ডিফল্ট ডাটা
+// ১. প্রাথমিক ডাটা (Spreadsheet Structural Sample)
 const initialPrograms = [
-    { id: 1, university: "Technical University of Munich", country: "Germany", program: "M.Sc. Data Engineering", scholarship: "Fully Funded", portal: "Uni-Assist", deadline: "2026-08-31", link: "https://www.tum.de" },
-    { id: 2, university: "Heidelberg University", country: "Germany", program: "M.Sc. Data and Computer Science", scholarship: "Fully Funded", portal: "University Portal", deadline: "2026-09-15", link: "https://www.uni-heidelberg.de" }
+    {
+        id: 1,
+        university: "MIT",
+        program: "M.Sc. Computer Science",
+        country: "USA",
+        scholarship: "Fully Funded",
+        profName: "Prof. John Doe",
+        researchArea: "Artificial Intelligence / ML",
+        link: "https://www.mit.edu",
+        remarks: "Priority 1 target",
+        ieltsScore: "7.5",
+        greScore: "320",
+        lorAcademic: "2 Academic",
+        lorProfessional: "1 Professional",
+        sopInfo: "500 words limit",
+        proposalInfo: "Needed",
+        startDate: "2026-09-01",
+        deadline: "2026-12-15",
+        feeAmount: "75",
+        feeCurrency: "USD"
+    }
 ];
 
-let programs = JSON.parse(localStorage.getItem('myGlobalTrackerData')) || initialPrograms;
+let programs = JSON.parse(localStorage.getItem('mySpreadsheetTrackerData')) || initialPrograms;
 
-// HTML Elements
 const tableBody = document.getElementById('universityTableBody');
 const searchInput = document.getElementById('searchInput');
 const countryFilter = document.getElementById('countryFilter');
@@ -14,80 +32,75 @@ const scholarshipFilter = document.getElementById('scholarshipFilter');
 const sortBy = document.getElementById('sortBy');
 const showingCountEl = document.getElementById('showing-count');
 
-// 📅 গুগল ক্যালেন্ডারে অটো ইভেন্ট যোগ করার লিংক তৈরি করার ফাংশন
 function createGoogleCalendarUrl(uni, program, deadlineDate) {
     if(!deadlineDate) return '#';
     const dateObj = new Date(deadlineDate);
     const startDate = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
-    
-    const title = encodeURIComponent(`Application Deadline: ${uni} (${program})`);
-    const details = encodeURIComponent(`Reminder: Application deadline for ${program} at ${uni}. Make sure all documents are submitted.`);
-    
-    // Google Calendar Event URL with Default Notifications
+    const title = encodeURIComponent(`Deadline: ${uni} (${program})`);
+    const details = encodeURIComponent(`Application Deadline for ${program} at ${uni}. Don't forget to submit documents.`);
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${startDate}&details=${details}`;
 }
 
-// ২. টেবিল ও পিডিএফ প্রিন্ট ভিউ রেন্ডার
+// ২. টেবিল ডাটা প্রদর্শন
 function renderPrograms(dataList) {
     tableBody.innerHTML = '';
     const pdfContainer = document.getElementById('pdfPrintContainer');
     if(pdfContainer) pdfContainer.innerHTML = '';
 
     if (dataList.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No programs found matching your criteria.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No matching programs found.</td></tr>`;
         return;
     }
 
     dataList.forEach(item => {
-        // Table Row Generation
         const row = document.createElement('tr');
-        row.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+        row.className = "hover:bg-slate-800/40 transition border-b border-slate-800";
 
         const calendarUrl = createGoogleCalendarUrl(item.university, item.program, item.deadline);
 
         row.innerHTML = `
-            <td class="p-3.5">
-                <div class="font-bold text-white">${item.university}</div>
-                <div class="text-[10px] text-slate-400">${item.country}</div>
+            <td class="p-4">
+                <div class="font-bold text-white text-sm">${item.university}</div>
+                <div class="text-[11px] text-teal-400 font-medium">${item.country}</div>
+                ${item.link ? `<a href="${item.link}" target="_blank" class="text-[10px] text-indigo-400 hover:underline">Link ↗</a>` : ''}
             </td>
-            <td class="p-3.5">
+            <td class="p-4">
                 <div class="font-medium text-slate-200">${item.program}</div>
+                <div class="text-[10px] text-slate-400">${item.profName ? 'Prof: ' + item.profName : 'Prof: N/A'}</div>
+                <div class="text-[10px] text-slate-500 italic">${item.researchArea || ''}</div>
             </td>
-            <td class="p-3.5">
+            <td class="p-4">
                 <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded ${item.scholarship === 'Fully Funded' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400'}">
                     ${item.scholarship}
                 </span>
+                <div class="text-[11px] text-slate-300 font-medium mt-1">Fee: ${item.feeAmount ? item.feeAmount + ' ' + (item.feeCurrency || '') : 'Free'}</div>
             </td>
-            <td class="p-3.5">
-                ${item.link && item.link !== "#" ? `<a href="${item.link}" target="_blank" class="text-cyan-400 hover:underline font-medium">${item.portal || 'Portal Link ↗'}</a>` : `<span class="text-slate-400">${item.portal || 'N/A'}</span>`}
+            <td class="p-4">
+                <div class="text-[11px] text-slate-300">IELTS: <span class="font-semibold text-white">${item.ieltsScore || 'N/A'}</span> | GRE: <span class="font-semibold text-white">${item.greScore || 'N/A'}</span></div>
+                <div class="text-[10px] text-slate-400 mt-0.5">LOR: ${item.lorAcademic || ''} ${item.lorProfessional || ''}</div>
             </td>
-            <td class="p-3.5">
-                <div class="font-semibold text-slate-200">${item.deadline}</div>
-                <!-- 📅 Calendar Reminder Link -->
+            <td class="p-4">
+                <div class="font-semibold text-white">${item.deadline}</div>
                 <a href="${calendarUrl}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 font-medium mt-0.5">
                     📅 Add to Calendar
                 </a>
             </td>
-            <td class="p-3.5 text-center">
-                <button onclick="deleteProgram(${item.id})" class="text-red-400 hover:text-red-300 font-semibold text-[11px] bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1 rounded transition">Delete</button>
+            <td class="p-4 text-center">
+                <button onclick="deleteProgram(${item.id})" class="text-red-400 hover:text-red-300 font-semibold text-[11px] bg-red-500/10 hover:bg-red-500/20 px-2.5 py-1 rounded-lg transition">Delete</button>
             </td>
         `;
 
         tableBody.appendChild(row);
 
-        // PDF Print Grid Item Generation (Matching Image 2)
+        // PDF Print Grid
         if(pdfContainer) {
             const pdfCard = document.createElement('div');
             pdfCard.className = "pdf-card bg-slate-50 rounded p-3 text-xs border border-slate-300";
             pdfCard.innerHTML = `
-                <h3 class="font-bold text-slate-900 text-sm">${item.university}</h3>
-                <div class="text-cyan-700 font-semibold mb-2">${item.program}</div>
-                <div class="grid grid-cols-2 gap-1 text-[11px] text-slate-600">
-                    <div><strong>End Date:</strong> ${item.deadline}</div>
-                    <div><strong>Funding:</strong> ${item.scholarship}</div>
-                    <div><strong>Portal:</strong> ${item.portal || 'N/A'}</div>
-                    <div><strong>Link:</strong> ${item.link || 'N/A'}</div>
-                </div>
+                <h3 class="font-bold text-slate-900 text-sm">${item.university} (${item.country})</h3>
+                <div class="text-indigo-700 font-semibold mb-1">${item.program}</div>
+                <div class="text-[11px] text-slate-600">Professor: ${item.profName || 'N/A'}</div>
+                <div class="text-[11px] text-slate-600">Deadline: ${item.deadline} | Funding: ${item.scholarship}</div>
             `;
             pdfContainer.appendChild(pdfCard);
         }
@@ -96,17 +109,15 @@ function renderPrograms(dataList) {
     populateCountryOptions();
 }
 
-// ৩. কান্ট্রি ফিল্টার ডাইনামিক করা
 function populateCountryOptions() {
     const countries = [...new Set(programs.map(p => p.country))];
     const currentVal = countryFilter.value;
     countryFilter.innerHTML = '<option value="all">All Countries</option>';
     countries.forEach(c => {
-        countryFilter.innerHTML += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`;
+        if(c) countryFilter.innerHTML += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`;
     });
 }
 
-// ৪. ফিল্টারিং ও সার্চিং
 function filterAndSortData() {
     const searchValue = searchInput.value.toLowerCase();
     const selectedCountry = countryFilter.value;
@@ -114,7 +125,9 @@ function filterAndSortData() {
     const selectedSort = sortBy.value;
 
     let filtered = programs.filter(item => {
-        const matchesSearch = item.university.toLowerCase().includes(searchValue) || item.program.toLowerCase().includes(searchValue);
+        const matchesSearch = item.university.toLowerCase().includes(searchValue) || 
+                              item.program.toLowerCase().includes(searchValue) ||
+                              (item.profName && item.profName.toLowerCase().includes(searchValue));
         const matchesCountry = selectedCountry === 'all' || item.country === selectedCountry;
         const matchesScholarship = selectedScholarship === 'all' || item.scholarship === selectedScholarship;
         return matchesSearch && matchesCountry && matchesScholarship;
@@ -127,45 +140,23 @@ function filterAndSortData() {
     if(showingCountEl) showingCountEl.innerText = `Showing ${filtered.length} of ${programs.length} programs`;
 }
 
-// 📥 CSV ফাইল আপলোড ও অটো-প্রসেসিং ফাংশন
-function handleCSVUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const lines = e.target.result.split('\n');
-        for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].split(',');
-            if (cols.length >= 3) {
-                programs.unshift({
-                    id: Date.now() + i,
-                    university: cols[0]?.trim() || "Unknown",
-                    program: cols[1]?.trim() || "N/A",
-                    country: cols[2]?.trim() || "Global",
-                    scholarship: cols[3]?.trim() || "Partial",
-                    portal: cols[4]?.trim() || "Direct",
-                    deadline: cols[5]?.trim() || "2026-12-31"
-                });
-            }
-        }
-        localStorage.setItem('myGlobalTrackerData', JSON.stringify(programs));
+function deleteProgram(id) {
+    if(confirm("Are you sure you want to delete this program?")) {
+        programs = programs.filter(p => p.id !== id);
+        localStorage.setItem('mySpreadsheetTrackerData', JSON.stringify(programs));
         filterAndSortData();
-        alert('CSV file imported successfully!');
-    };
-    reader.readAsText(file);
+    }
 }
 
-// 🔄 ডাটা রিসেট করার ফাংশন
 function resetPersonalData() {
-    if(confirm("Are you sure you want to reset all your saved data to default?")) {
-        localStorage.removeItem('myGlobalTrackerData');
+    if(confirm("Are you sure you want to reset all data?")) {
+        localStorage.removeItem('mySpreadsheetTrackerData');
         programs = [...initialPrograms];
         filterAndSortData();
     }
 }
 
-// ৫. প্রোগ্রাম মোডাল হ্যান্ডলিং
+// Modal Handlers
 const addBtn = document.getElementById('addBtn');
 const addModal = document.getElementById('addModal');
 const closeModal = document.getElementById('closeModal');
@@ -186,22 +177,31 @@ if(programForm) {
             program: document.getElementById('uniProgram').value,
             country: document.getElementById('uniCountry').value,
             scholarship: document.getElementById('uniScholarship').value,
-            portal: document.getElementById('uniPortal').value || "Direct",
+            profName: document.getElementById('profName').value,
+            researchArea: document.getElementById('researchArea').value,
+            link: document.getElementById('uniLink').value,
+            remarks: document.getElementById('remarks').value,
+            ieltsScore: document.getElementById('ieltsScore').value,
+            greScore: document.getElementById('greScore').value,
+            lorAcademic: document.getElementById('lorAcademic').value,
+            lorProfessional: document.getElementById('lorProfessional').value,
+            sopInfo: document.getElementById('sopInfo').value,
+            proposalInfo: document.getElementById('proposalInfo').value,
+            startDate: document.getElementById('startDate').value,
             deadline: document.getElementById('uniDeadline').value,
-            link: document.getElementById('uniLink').value || "#"
+            feeAmount: document.getElementById('feeAmount').value,
+            feeCurrency: document.getElementById('feeCurrency').value
         };
         programs.unshift(newProgram);
-        localStorage.setItem('myGlobalTrackerData', JSON.stringify(programs));
+        localStorage.setItem('mySpreadsheetTrackerData', JSON.stringify(programs));
         filterAndSortData();
         hideModal();
     });
 }
 
-// Event Listeners
 if(searchInput) searchInput.addEventListener('input', filterAndSortData);
 if(countryFilter) countryFilter.addEventListener('change', filterAndSortData);
 if(scholarshipFilter) scholarshipFilter.addEventListener('change', filterAndSortData);
 if(sortBy) sortBy.addEventListener('change', filterAndSortData);
 
-// Initial Run
 filterAndSortData();
