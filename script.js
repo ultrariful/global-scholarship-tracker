@@ -288,3 +288,6 @@ function handleCSVUpload(event) {
 
 // Make handler available for inline HTML onchange="handleCSVUpload(event)"
 window.handleCSVUpload = handleCSVUpload;
+
+// Initial Load
+filterAndSortData();
